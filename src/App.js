@@ -1,102 +1,61 @@
+import React, { useState } from "react";
+import { CalculatorContainer, Display, Button, ButtonsContainer } from "./styles";
+import { evaluate } from "mathjs"; // Import evaluate from math.js
 
-import Input from './components/Input';
-import Button from './components/Button';
+export default function App() {
+  const [input, setInput] = useState(""); // Stores the current input
+  const [result, setResult] = useState(""); // Stores the result of the calculation
 
-import { Container, Content, Row } from './styles';
-import { useState } from 'react';
+  // Handle button clicks
+  const handleClick = (value) => {
+    if (value === "=") {
+      try {
+        // Ensure the input is not empty before evaluating
+        if (!input.trim()) {
+          setResult("Error");
+          return;
+        }
 
+        // Use math.evaluate to safely evaluate the expression
+        const evaluatedResult = evaluate(input);
 
-const App = () => {
-  const [currentNumber, setCurrentNumber] = useState('0');
-  const [firstNumber, setFirstNumber] = useState('0');
-  const [operation, setOperation] = useState('');
-
-  const handleOnClear = () => {
-    setCurrentNumber('0')
-    setFirstNumber('0')
-    setOperation('')
+        // Update the result state
+        setResult(evaluatedResult.toString());
+      } catch (error) {
+        // Handle any errors during evaluation
+        setResult("Error");
+      }
+    } else if (value === "C") {
+      // Clear the input and result
+      setInput("");
+      setResult("");
+    } else {
+      // Append the clicked value to the input
+      setInput((prevInput) => prevInput + value);
+    }
   };
 
-  const handleAddNumber = (num) => {
-    setCurrentNumber(prev => `${prev === '0' ? '' : prev}${num}`)
-  }
-
-  const handleSumNumbers = () => {
-
-    if(firstNumber === '0'){
-        setFirstNumber(String(currentNumber));
-        setCurrentNumber('0')
-        setOperation('+')
-    }else {
-      const sum = Number(firstNumber) + Number(currentNumber);
-      setCurrentNumber(String(sum))
-      setOperation('')
-    }
-
-  }
-
-  const handleMinusNumbers = () => {
-
-    if(firstNumber === '0'){
-        setFirstNumber(String(currentNumber));
-        setCurrentNumber('0')
-        setOperation('-')
-    }else {
-      const sum = Number(firstNumber) - Number(currentNumber);
-      setCurrentNumber(String(sum))
-      setOperation('')
-    }
-
-  }
-
-  const handleEquals = () => {
-
-    if(firstNumber !== '0' && operation !== '' && currentNumber !== '0'){
-        switch(operation){
-          case '+':
-            handleSumNumbers();
-            break;
-          case '-':
-            handleMinusNumbers();
-            break;
-          default: 
-            break;
-        }
-    }
-
-  }
-
   return (
-    <Container>
-      <Content>
-        <Input value={currentNumber}/>
-        <Row>
-          <Button label="x"/>
-          <Button label="/"/>
-          <Button label="c" onClick={handleOnClear}/>
-          <Button label="."/>
-        </Row>
-        <Row>
-          <Button label="7" onClick={() => handleAddNumber('7')}/>
-          <Button label="8" onClick={() => handleAddNumber('8')}/>
-          <Button label="9" onClick={() => handleAddNumber('9')}/>
-          <Button label="-" onClick={handleMinusNumbers}/>
-        </Row>
-        <Row>
-          <Button label="4" onClick={() => handleAddNumber('4')}/>
-          <Button label="5" onClick={() => handleAddNumber('5')}/>
-          <Button label="6" onClick={() => handleAddNumber('6')}/>
-          <Button label="+" onClick={handleSumNumbers}/>
-        </Row>
-        <Row>
-          <Button label="1" onClick={() => handleAddNumber('1')}/>
-          <Button label="2" onClick={() => handleAddNumber('2')}/>
-          <Button label="3" onClick={() => handleAddNumber('3')}/>
-          <Button label="=" onClick={handleEquals}/>
-        </Row>
-      </Content>
-    </Container>
+    <CalculatorContainer>
+      <h1>React Calculator</h1>
+      <Display type="text" value={result || input} readOnly />
+      <ButtonsContainer>
+        {/* Numeric buttons */}
+        {[7, 8, 9, 4, 5, 6, 1, 2, 3, 0].map((num) => (
+          <Button key={num} onClick={() => handleClick(num)}>
+            {num}
+          </Button>
+        ))}
+        {/* Operator buttons */}
+        {["+", "-", "*", "/"].map((op) => (
+          <Button key={op} onClick={() => handleClick(op)}>
+            {op}
+          </Button>
+        ))}
+        {/* Special buttons */}
+        <Button onClick={() => handleClick("C")}>C</Button>
+        <Button onClick={() => handleClick("=")}>=</Button>
+      </ButtonsContainer>
+    </CalculatorContainer>
   );
 }
-
-export default App;
